@@ -139,11 +139,15 @@ def run() -> int:
     args = parse_args()
 
     if not API_ID or not API_HASH or not PHONE:
-        print("API_ID / API_HASH / PHONE must be set in .env", file=sys.stderr)
-        return 2
+        if args.download_only:
+            log.info("API_ID / API_HASH / PHONE not set in .env; "
+                     "download-only mode does not require them")
+        else:
+            print("API_ID / API_HASH / PHONE must be set in .env", file=sys.stderr)
+            return 2
 
     channel = args.channel or CHANNEL_ID
-    if not channel:
+    if not channel and not args.download_only:
         print(
             "No channel target. Set CHANNEL_ID in .env or pass --channel.",
             file=sys.stderr,

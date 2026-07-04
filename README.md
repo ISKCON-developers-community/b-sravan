@@ -213,3 +213,9 @@ HK Minsk Audio bot.session  telethon auth (gitignored, created on first run)
 - For the `-d` / `--download-only` mode, the file is left in
   `./downloads/` for you to inspect, re-tag, or upload later. The
   current run does **not** re-upload it.
+- **The four Telegram credentials in `.env` are only required for
+  uploading.** With `-d` / `--download-only` you can run the tool
+  with no `.env` at all (or with a partial one) — it will download
+  and tag the mp3, then exit without contacting Telegram. The
+  full pipeline (no `-d`) still requires `API_ID`, `API_HASH`,
+  `PHONE`, and `CHANNEL_ID` to be set.
