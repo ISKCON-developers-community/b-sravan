@@ -1,6 +1,6 @@
 # b-shravan
 
-YouTube → Telegram channel poster. Pick a video (URL on the CLI or
+YouTube → Telegram channel MP3 poster. Pick a video (URL on the CLI or
 interactively), tag the audio with ID3 metadata, and post it to a
 Telegram channel with a formatted caption.
 
@@ -17,15 +17,13 @@ Telegram channel with a formatted caption.
   single run without editing `.env`.
 - **`--artist` / `--title`** — skip the interactive prompts for
   scripted use.
-- **First-release caption** has no date suffix on the title line;
-  re-enable it with `with_date=True` in `caption.py` when ready.
 
 ## Requirements
 
 - Python 3.13 or newer
 - A Telegram account + an API id/hash from
-  [my.telegram.org/apps](https://my.telegram.org/apps)
-- A Telegram channel you can post to (you must be a member, ideally
+  [my.telegram.org/apps](https://my.telegram.org/apps) (optional, use -d flag to scip uploading to telegra)
+- A Telegram channel you can post to (you must be a member and
   an admin; the bot or your user account is used to post)
 - `ffmpeg` and `ffprobe` on `PATH` — `yt-dlp` needs them to extract
   audio. Install via your package manager:
@@ -37,7 +35,8 @@ Telegram channel with a formatted caption.
 ## Install (Unix / Linux / macOS)
 
 ```sh
-git clone <your-fork-or-this-repo-url> b-shravan
+git clone https://github.com/ISKCON-developers-community/b-sravan.git
+
 cd b-shravan
 
 # Create and activate a virtualenv
@@ -55,7 +54,7 @@ cp .env.example .env
 $EDITOR .env
 ```
 
-You need four values in `.env`:
+You need (only for uploading) four values in `.env`:
 
 | Variable     | Where to get it                                          |
 |--------------|----------------------------------------------------------|
@@ -66,7 +65,7 @@ You need four values in `.env`:
 
 On the **first run** telethon will ask for a login code sent to your
 Telegram app — this is the normal authorization flow. The session is
-saved to `HK Minsk Audio bot.session` in the project root, so the
+saved to `<session_name>.session` in the project root, so the
 next runs are silent.
 
 ## Install (Windows)
