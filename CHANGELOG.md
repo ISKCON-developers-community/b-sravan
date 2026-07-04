@@ -5,6 +5,34 @@ All notable changes to b-shravan are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-07-04
+
+### Changed
+- **Config layout reorganised**: `config.py` now has two clearly delimited
+  sections — `TUNABLE DEFAULTS` (top, edit freely: `AUDIO_BITRATE`,
+  `ALBUM_NAME`, `GENRE`, `CUSTOM_DESCRIPTION`, `DEFAULT_SPEAKER_NAME`,
+  `DOWNLOADS_DIR`, `ENTITY`, `CHANNEL_ID`, `ADMIN_ID`) and
+  `IMMUTABLE CREDENTIALS` (bottom, loaded from `.env`:
+  `API_ID`, `API_HASH`, `PHONE`).
+- **`.env` now needs only three secrets** (`API_ID`, `API_HASH`,
+  `PHONE`). The channel id, session name, ID3 tags, download dir,
+  and audio bitrate are all configured in `config.py`.
+- **Session filename uses `ENTITY` config** instead of a hardcoded
+  string: `b-shravan-session.session` by default.
+- **Audio bitrate is configurable** via `config.AUDIO_BITRATE`
+  (default 128 kbps, was hardcoded 192).
+- **All TODO/FIXME comments removed** from project source.
+- README updated to reflect the 3-secret `.env` + tunable
+  `config.py` split, on both Unix and Windows install paths.
+
+### Notes
+- No breaking changes for existing users. If your `.env` had
+  `CHANNEL_ID` or `ADMIN_ID`, move those values into `config.py`
+  and remove them from `.env`.
+- The Telethon session file is now `b-shravan-session.session` for
+  fresh installs. Existing `HK Minsk Audio bot.session` files still
+  work (rename or back up as preferred).
+
 ## [0.1.0] - 2026-07-04
 
 First public release. YouTube → Telegram channel poster with a
@@ -49,3 +77,4 @@ configurable caption and a download-only mode.
   public id and the canonical id mismatch on a fresh session.
 - For batch-downloading + tagging a YouTube playlist without
   ever contacting Telegram, use `-d` (works without `.env` at all).
+

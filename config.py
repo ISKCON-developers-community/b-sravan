@@ -1,34 +1,46 @@
-"""Project config — loads .env via python-dotenv, exposes typed constants."""
+"""Project config — loads .env via python-dotenv, exposes typed constants.
+
+Top section: tunable defaults (edit freely, NOT secrets)
+Bottom section: immutable credentials (loaded from .env, never edit)
+"""
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
+# ──────────────────────────────────────────────────────────────────────
+# TUNABLE DEFAULTS — edit in this file, not in .env
+# ──────────────────────────────────────────────────────────────────────
+
+# Audio quality for yt-dlp mp3 extraction (kbps)
+AUDIO_BITRATE = 128
+
+# ID3 tags applied to every uploaded mp3
+ALBUM_NAME = "Лекции Минского храма Кришны"   # placeholder: your YT channel name
+GENRE = "Podcast"                             # ID3 genre tag
+CUSTOM_DESCRIPTION = "Лекции @newjaipur"       # bottom line of channel caption
+DEFAULT_SPEAKER_NAME = "Дас"                  # fallback when no artist supplied
+
+# Filesystem
+DOWNLOADS_DIR = "downloads"                    # where yt-dlp lands mp3 files
+
+# Telethon session filename (without .session suffix)
+ENTITY = "b-shravan-session"
+
+# Channel destination for uploads. CLI --channel overrides this.
+# Accepts: @username, -100... canonical id, public id, or invite link
+CHANNEL_ID = "@hkhrtest"
+
+# Personal Telegram user id (for future "send copy to me" feature)
+ADMIN_ID = 0
+
+
+# ──────────────────────────────────────────────────────────────────────
+# IMMUTABLE CREDENTIALS — loaded from .env, DO NOT EDIT
+# ──────────────────────────────────────────────────────────────────────
+
 # Telegram API credentials (from my.telegram.org/apps)
 API_ID = int(os.getenv("API_ID") or 0)
 API_HASH = os.getenv("API_HASH") or ""
 PHONE = os.getenv("PHONE") or ""
-
-# Telethon session file label (any name; .session is appended automatically)
-ENTITY = "HK Minsk Audio bot"
-
-# Channel destination for uploads. CLI --channel overrides this.
-# Accepts any of:
-#   @channel_username     — recommended; works regardless of id format quirks
-#   -1001234567890        — canonical id for supergroups/channels
-#   1402888933            — public id (works but has rare resolution edge cases)
-#   https://t.me/foo      — invite link
-CHANNEL_ID = os.getenv("CHANNEL_ID") or ""
-
-# Optional: personal Telegram user id (currently unused in the upload flow;
-# reserved for any future "send a copy to me" feature).
-ADMIN_ID = int(os.getenv("ADMIN_ID") or 0)
-
-# ID3 / channel caption defaults
-ALBUM_NAME = "Лекции Минского храма Кришны"
-GENRE = "Кришна катха"
-CUSTOM_DESCRIPTION = "Лекции @newjaipur"
-DEFAULT_SPEAKER_NAME = "Дас"
-
-# Where downloaded mp3s land (created on first run, gitignored).
-DOWNLOADS_DIR = "downloads"

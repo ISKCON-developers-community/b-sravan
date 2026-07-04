@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import yt_dlp
 
-from config import DOWNLOADS_DIR
+from config import AUDIO_BITRATE, DOWNLOADS_DIR
 
 
 @dataclass
@@ -51,7 +51,7 @@ def download(url: str) -> Download:
         "postprocessors": [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "mp3",
-            "preferredquality": "192",
+            "preferredquality": str(AUDIO_BITRATE),
         }],
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

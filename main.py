@@ -121,7 +121,7 @@ async def _post_to_channel(
         phone=PHONE,
         default_artist=artist,
         covers_dir=Path("covers"),
-        session_name=Path(ENTITY),
+        session_name=Path(ENTITY + ".session"),
     )
     try:
         await uploader.upload(
@@ -145,7 +145,6 @@ def run() -> int:
         else:
             print("API_ID / API_HASH / PHONE must be set in .env", file=sys.stderr)
             return 2
-
     channel = args.channel or CHANNEL_ID
     if not channel and not args.download_only:
         print(
@@ -200,7 +199,6 @@ def run() -> int:
         return 1
     log.info("done in %.1fs", time.monotonic() - t0)
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(run())
