@@ -9,8 +9,10 @@ wheels/
 # Virtual environments
 .venv
 .env
+env/
 *.session
 
 # custom folders and files
 covers/
 *.mp3
+downloads/

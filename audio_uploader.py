@@ -134,20 +134,25 @@ class TelegramAudioUploader:
     async def _upload_file(
         self,
         audio: AudioFile,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
+        caption: Optional[str] = None,
     ):
         client = await self._get_client()
-        
+
         artist = audio.artist or self.default_artist
         title = audio.title or audio.basename
-        
+
         cover_path = self.cover_art.get_path(artist)
-        
+        # Default caption: legacy machine-readable form. Callers that want a
+        # human multi-line caption pass it explicitly (see caption.py).
+        if caption is None:
+            caption = f"{artist}={title}={audio.duration}"
+
         try:
             await client.send_file(
                 self.entity,
                 str(audio.path),
-                caption=f"{artist}={title}={audio.duration}",
+                caption=caption,
                 use_cache=False,
                 part_size_kb=512,
                 thumb=str(cover_path) if cover_path else None,
@@ -172,10 +177,11 @@ class TelegramAudioUploader:
         file_path: Union[str, Path],
         artist: str = "",
         title: str = "",
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
+        caption: Optional[str] = None,
     ) -> bool:
         audio = AudioFile(file_path, artist, title)
-        await self._upload_file(audio, progress_callback)
+        await self._upload_file(audio, progress_callback, caption)
         return True
     
     async def upload_multiple(
