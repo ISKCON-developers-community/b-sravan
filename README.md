@@ -22,7 +22,7 @@ Telegram channel with a formatted caption.
 
 - Python 3.13 or newer
 - A Telegram account + an API id/hash from
-  [my.telegram.org/apps](https://my.telegram.org/apps) (optional, use -d flag to scip uploading to telegra)
+  [my.telegram.org/apps](https://my.telegram.org/apps) (optional, use -d flag to **skip** uploading to **Telegram**)
 - A Telegram channel you can post to (you must be a member and
   an admin; the bot or your user account is used to post)
 - `ffmpeg` and `ffprobe` on `PATH` — `yt-dlp` needs them to extract
@@ -54,19 +54,24 @@ cp .env.example .env
 $EDITOR .env
 ```
 
-You need (only for uploading) four values in `.env`:
+You need **only three secret values** in `.env` (from
+[my.telegram.org/apps](https://my.telegram.org/apps)):
 
-| Variable     | Where to get it                                          |
-|--------------|----------------------------------------------------------|
-| `API_ID`     | `my.telegram.org/apps` → "App api_id"                    |
-| `API_HASH`   | `my.telegram.org/apps` → "App api_hash"                  |
-| `PHONE`      | Your phone number in international format (`+375…`)      |
-| `CHANNEL_ID` | `@channel_username` (recommended), or numeric id, or invite link |
+| Variable   | Where to get it                          |
+|------------|------------------------------------------|
+| `API_ID`   | "App api_id"                             |
+| `API_HASH` | "App api_hash"                           |
+| `PHONE`    | Your phone in international format (`+375…`) |
 
-On the **first run** telethon will ask for a login code sent to your
-Telegram app — this is the normal authorization flow. The session is
-saved to `<session_name>.session` in the project root, so the
-next runs are silent.
+The channel destination, session name, ID3 tags, download directory,
+and audio bitrate are all **tunable defaults** in `config.py` — edit
+that file directly, not `.env`. See the `TUNABLE DEFAULTS` section at
+the top of `config.py` for the full list.
+
+On the **first run** telethon will ask for a login code in the
+terminal; enter the code Telegram sends to your app. The session is
+saved to `<ENTITY>.session` in the project root (default:
+`b-shravan-session.session`), so the next runs are silent.
 
 ## Install (Windows)
 
@@ -100,13 +105,14 @@ copy .env.example .env
 notepad .env
 ```
 
-Fill in the same four values as on Unix (`API_ID`, `API_HASH`,
-`PHONE`, `CHANNEL_ID` — see the table above).
+Fill in the same **three secret values** as on Unix (`API_ID`,
+`API_HASH`, `PHONE`) — see the table above. Edit `config.py` for the
+tunable defaults.
 
 On the **first run** telethon will ask for a login code in the
 terminal; enter the code Telegram sends to your app. The session is
-saved to `HK Minsk Audio bot.session` so subsequent runs are silent.
-
+saved to `<ENTITY>.session` in the project root (default:
+`b-shravan-session.session`), so subsequent runs are silent.
 > Tip: the `python` command on Windows sometimes opens the Microsoft
 > Store stub instead of your real install. If that happens, run
 > `python3` instead, or use the full path to the venv python:
