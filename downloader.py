@@ -33,7 +33,7 @@ def download(url: str) -> Download:
     Raises yt_dlp.utils.DownloadError on bad URLs / network errors /
     unsupported sites. Caller is responsible for user-facing messaging.
     """
-    out_dir = Path(DOWNLOADS_DIR).resolve()
+    out_dir = DOWNLOADS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # First pass: grab the video title (no download, no disk write).

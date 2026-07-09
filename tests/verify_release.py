@@ -76,7 +76,7 @@ check(
 import main
 def fake_download(url):
     from downloader import Download
-    return Download(path=Path("test.mp3"), title="T")
+    return Download(path=REPO / "test.mp3", title="T")
 
 orig = main.download
 main.download = fake_download

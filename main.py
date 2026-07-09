@@ -19,7 +19,7 @@ from pathlib import Path
 from audio_uploader import TelegramAudioUploader, AudioUploadError
 from caption import build_channel_caption
 from config import (
-    API_HASH, API_ID, CHANNEL_ID, CUSTOM_DESCRIPTION, ENTITY, PHONE,
+    API_HASH, API_ID, BASE_DIR, CHANNEL_ID, COVERS_DIR, CUSTOM_DESCRIPTION, ENTITY, PHONE,
 )
 from downloader import download
 from tagger import tag_mp3
@@ -120,8 +120,8 @@ async def _post_to_channel(
         api_hash=API_HASH,
         phone=PHONE,
         default_artist=artist,
-        covers_dir=Path("covers"),
-        session_name=Path(ENTITY + ".session"),
+        covers_dir=COVERS_DIR,
+        session_name=Path(BASE_DIR / f"{ENTITY}.session"),
     )
     try:
         await uploader.upload(
@@ -136,6 +136,7 @@ async def _post_to_channel(
 # ---------- Main flow -------------------------------------------------------
 
 def run() -> int:
+    #TODO create ASCII art banner
     args = parse_args()
 
     if not API_ID or not API_HASH or not PHONE:
@@ -197,7 +198,7 @@ def run() -> int:
     except AudioUploadError as e:
         log.error("upload failed: %s", e)
         return 1
-    log.info("done in %.1fs", time.monotonic() - t0)
+    log.info("done in %.1fs", time.monotonic() - t0) #TODO what is done. Provide more info. Published into <channel>
     return 0
 
 if __name__ == "__main__":

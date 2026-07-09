@@ -12,6 +12,8 @@ from mutagen.oggvorbis import OggVorbis
 from mutagen.oggopus import OggOpus
 from mutagen.flac import FLAC
 
+from config import BASE_DIR
+
 
 class AudioUploadError(Exception):
     pass
@@ -71,7 +73,9 @@ class AudioFile:
 
 class CoverArt:
     def __init__(self, covers_dir: Union[str, Path] = "covers"):
-        self.covers_dir = Path(covers_dir).resolve()
+        self.covers_dir = Path(covers_dir)
+        if not self.covers_dir.is_absolute():
+            self.covers_dir = (BASE_DIR / self.covers_dir).resolve()
         self.default_cover = self.covers_dir / "cover.jpg"
     
     def get_path(self, artist: str) -> Optional[Path]:
@@ -105,6 +109,8 @@ class TelegramAudioUploader:
         self.phone = phone
         self.default_artist = default_artist
         self.covers_dir = Path(covers_dir)
+        if not self.covers_dir.is_absolute():
+            self.covers_dir = (BASE_DIR / self.covers_dir).resolve()
         self.session_name = str(Path(session_name).stem)
         self._client: Optional[TelegramClient] = None
         
@@ -122,7 +128,7 @@ class TelegramAudioUploader:
     
     async def _get_client(self) -> TelegramClient:
         if self._client is None:
-            session_path = Path(self.session_name)
+            session_path = BASE_DIR / f"{self.session_name}.session"
             self._client = TelegramClient(
                 str(session_path),
                 self.api_id,
