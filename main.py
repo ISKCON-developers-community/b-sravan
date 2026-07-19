@@ -144,8 +144,11 @@ def run() -> int:
             log.info("API_ID / API_HASH / PHONE not set in .env; "
                      "download-only mode does not require them")
         else:
-            print("API_ID / API_HASH / PHONE must be set in .env", file=sys.stderr)
-            return 2
+            log.warning(
+                "API_ID / API_HASH / PHONE not set in .env; "
+                "falling back to download-only mode (skipping upload)"
+            )
+            args.download_only = True
     channel = args.channel or CHANNEL_ID
     if not channel and not args.download_only:
         print(

@@ -1,10 +1,11 @@
 """End-to-end run() tests for the credential guard.
 
 Verifies: -d / --download-only works without Telegram credentials in
-.env, while the upload path still requires them. Each test spawns the
-tool in a subprocess from a temp directory with a sanitized environment
-so config.py truly sees no credentials (rather than relying on
-import-time caching or the project's own .env).
+.env, and the upload path without -d / creds falls back to download-only
+(warns, rc=0). Each test spawns the tool in a subprocess from a temp
+directory with a sanitized environment so config.py truly sees no
+credentials (rather than relying on import-time caching or the
+project's own .env).
 """
 import os
 import subprocess
@@ -73,10 +74,13 @@ class TestRunGuards:
         r = _run_in_clean_env(
             ["main.py", "-l", "http://x", "--artist", "A", "--title", "T"]
         )
-        assert r.returncode == 2, (
-            f"upload path should fail with rc=2 without creds; "
+        # Without creds and without -d, run() falls back to download-only
+        # (rc=0) and warns, rather than hard-failing with rc=2.
+        assert r.returncode == 0, (
+            f"missing creds should fall back to download-only (rc=0); "
             f"got rc={r.returncode}\nstdout: {r.stdout}\nstderr: {r.stderr}"
         )
-        assert "must be set in .env" in r.stdout + r.stderr, (
-            f"expected the credential-guard message; got: {r.stdout + r.stderr}"
+        assert "falling back to download-only" in r.stdout + r.stderr, (
+            f"expected the fallback warning; got: {r.stdout + r.stderr}"
         )
+        assert "download-only mode" in r.stdout + r.stderr
