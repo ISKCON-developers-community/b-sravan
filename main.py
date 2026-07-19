@@ -205,4 +205,8 @@ def run() -> int:
     return 0
 
 if __name__ == "__main__":
-    sys.exit(run())
+    try:
+        sys.exit(run())
+    except KeyboardInterrupt:
+        print("\nInterrupted. Exiting cleanly.", file=sys.stderr)
+        sys.exit(130)
