@@ -40,14 +40,16 @@ def _run_in_clean_env(args) -> subprocess.CompletedProcess:
         if src_mp3.is_file():
             (Path(tmp) / "test.mp3").write_bytes(src_mp3.read_bytes())
         # The tool is just an import of main.run() with sys.argv set.
+        # download + fetch_title are stubbed (both are network calls) so the
+        # test runs offline and deterministically.
         cmd = [PYTHON, "-c",
-               f"import sys; sys.argv = {args!r}; "
-               # Project root on sys.path so 'import main' finds it.
-               f"sys.path.insert(0, '{REPO}'); "
+               "import sys; sys.argv = " + repr(args) + "; "
+               "sys.path.insert(0, '" + str(REPO) + "'); "
                "import main; "
                "from pathlib import Path; "
                "from downloader import Download; "
                "main.download = lambda url: Download(path=Path('test.mp3'), title='T'); "
+               "main.fetch_title = lambda url: 'T'; "
                "sys.exit(main.run())"]
         return subprocess.run(cmd, cwd=tmp, env=clean,
                               capture_output=True, text=True, timeout=15)

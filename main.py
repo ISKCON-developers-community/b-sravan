@@ -21,7 +21,7 @@ from caption import build_channel_caption
 from config import (
     API_HASH, API_ID, BASE_DIR, CHANNEL_ID, COVERS_DIR, CUSTOM_DESCRIPTION, ENTITY, PHONE,
 )
-from downloader import download
+from downloader import download, fetch_title
 from tagger import tag_mp3
 
 logging.basicConfig(
@@ -200,7 +200,26 @@ def run() -> int:
 
     url = args.link or prompt_url_with_picker()
 
-    # 1. Download
+    # 1. Prefetch the video title (cheap, no download) so the user can
+    #    confirm / edit it BEFORE the heavier audio download starts.
+    try:
+        yt_title = fetch_title(url)
+    except Exception as e:
+        log.error("could not read video title: %s", e)
+        return 1
+    log.info("video title: %r", yt_title)
+
+    # 2. Prompt for tags (with sensible defaults for scripting)
+    if args.artist and args.title:
+        artist, title = args.artist, args.title
+    else:
+        default_artist = args.artist or ""
+        default_title = args.title or yt_title
+        artist = prompt_tag("Artist", default_artist) if not args.artist else args.artist
+        title = prompt_tag("Title",  default_title)  if not args.title  else args.title
+    log.info("tags: artist=%r title=%r", artist, title)
+
+    # 3. Download
     log.info("downloading %s", url)
     try:
         dl = download(url)
@@ -209,21 +228,11 @@ def run() -> int:
         return 1
     log.info("downloaded -> %s (title=%r)", dl.path, dl.title)
 
-    # 2. Prompt for tags (with sensible defaults for scripting)
-    if args.artist and args.title:
-        artist, title = args.artist, args.title
-    else:
-        default_artist = args.artist or ""
-        default_title = args.title or dl.title
-        artist = prompt_tag("Artist", default_artist) if not args.artist else args.artist
-        title = prompt_tag("Title",  default_title)  if not args.title  else args.title
-    log.info("tags: artist=%r title=%r", artist, title)
-
-    # 3. Tag the mp3
+    # 4. Tag the mp3
     tag_mp3(dl.path, artist, title)
     log.info("id3 tags written")
 
-    # 4. Build caption
+    # 5. Build caption
     caption = build_channel_caption(artist, title, CUSTOM_DESCRIPTION)
     print("----caption----")
     print(caption, end="")
@@ -234,7 +243,7 @@ def run() -> int:
         print(f"File saved at: {dl.path}")
         return 0
 
-    # 5. Upload
+    # 6. Upload
     log.info("posting to %s", channel)
     t0 = time.monotonic()
     try:
