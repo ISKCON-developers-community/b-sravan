@@ -1,10 +1,5 @@
-# Runtime dependencies for b-shravan.
-# Install with:  pip install -r requirements.txt
-# Regenerate from pyproject.toml with:  uv pip compile pyproject.toml
-mutagen==1.48.1
-pyaes==1.6.1
-pyasn1==0.6.3
-python-dotenv==1.2.2
-rsa==4.9.1
-telethon==1.44.0
-yt-dlp==2026.6.9
+mutagen>=1.47.0
+python-dotenv>=1.2.2
+telethon>=1.43.1
+yt-dlp>=2025.10.22
+pytest>=9.0.3

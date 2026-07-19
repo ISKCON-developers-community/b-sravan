@@ -8,6 +8,10 @@ Telegram channel with a formatted caption.
 
 - **CLI** (`-l URL` / `--link URL`) or **interactive TUI** — pick a
   video, type the artist and title, done.
+- **YouTube live-stream picker** — run without `-l` and the tool lists
+  the 5 newest past live streams from `config.YT_CHANNEL` (default
+  `@SoznanieKrishnyBLR`) as a numbered menu; pick one, no URL copy-paste.
+  Requires Telegram creds; falls back to a manual URL prompt otherwise.
 - **Auto-tagging** with `mutagen` — artist, title, album, year, genre,
   cover art (`covers/{artist}.jpg` or fallback `covers/cover.jpg`).
 - **Formatted caption** posted to the channel (see [Caption format](#caption-format)).
@@ -124,6 +128,18 @@ Interactive TUI (prompts for the URL, then artist, then title):
 
 ```sh
 python main.py
+```
+
+Interactive with the YouTube live-stream picker — picks from the 5 newest
+past live streams of `config.YT_CHANNEL` (default `@SoznanieKrishnyBLR`):
+
+```sh
+python main.py
+# → Recent live streams — pick a number:
+#   [1] Воскресная лекция. Ачьюта пр … 19.07.2026г
+#   [2] ШБ 10.13.45. Могущество Кришны … 19.07.2026
+#   …
+# Number (or paste a URL to override): 1
 ```
 
 One-shot, every flag on the command line:
