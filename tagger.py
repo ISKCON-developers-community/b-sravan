@@ -5,16 +5,17 @@ from typing import Union
 
 from mutagen.id3 import ID3, ID3NoHeaderError, TDRC, TIT2, TALB, TPE1, TCON, APIC
 
-from config import ALBUM_NAME, GENRE
+from config import ALBUM_NAME, GENRE, COVERS_DIR
 
 
 def _cover_path(artist: str) -> Path | None:
-    """Look for covers/{artist}.jpg, then covers/cover.jpg. Return None if neither."""
-    covers = Path("covers")
-    custom = covers / f"{artist}.jpg"
+    """Look for {COVERS_DIR}/{artist}.jpg, then {COVERS_DIR}/cover.jpg.
+    Return None if neither exists.
+    """
+    custom = COVERS_DIR / f"{artist}.jpg"
     if custom.is_file():
         return custom
-    default = covers / "cover.jpg"
+    default = COVERS_DIR / "cover.jpg"
     if default.is_file():
         return default
     return None

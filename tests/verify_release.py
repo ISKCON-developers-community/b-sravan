@@ -70,16 +70,18 @@ check(
     "-d" in r.stdout and "--download-only" in r.stdout,
 )
 
-# 4. End-to-end: download-only path with a stubbed downloader (no YouTube,
-#    no Telegram). Confirms the early-exit branch returns 0 and never
-#    touches the upload code.
+# 4. End-to-end: download-only path with a stubbed downloader AND a stubbed
+#    title fetch (both are network calls; no YouTube, no Telegram). Confirms
+#    the early-exit branch returns 0 and never touches the upload code.
 import main
 def fake_download(url):
     from downloader import Download
-    return Download(path=Path("test.mp3"), title="T")
+    return Download(path=REPO / "test.mp3", title="T")
 
 orig = main.download
+orig_title = main.fetch_title
 main.download = fake_download
+main.fetch_title = lambda url: "T"
 try:
     sys.argv = ["main.py", "-l", "http://x", "--artist", "A",
                 "--title", "T", "-d"]
@@ -87,6 +89,7 @@ try:
     check("download-only path returns 0", rc == 0)
 finally:
     main.download = orig
+    main.fetch_title = orig_title
 
 # 5. Real pytest suite (canonical test command)
 r = subprocess.run(

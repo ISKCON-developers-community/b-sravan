@@ -27,13 +27,24 @@ def _safe_filename(title: str) -> str:
     return cleaned or "audio"
 
 
+def fetch_title(url: str) -> str:
+    """Cheaply fetch the video title (no download, no disk write).
+
+    Used to prefill the title prompt before the heavier download begins.
+    Raises yt_dlp.utils.DownloadError on bad URLs / network errors.
+    """
+    with yt_dlp.YoutubeDL({"quiet": True, "skip_download": True}) as ydl:  # type: ignore[arg-type]
+        info = ydl.extract_info(url, download=False)
+    return info.get("title") or "audio"
+
+
 def download(url: str) -> Download:
     """Download audio from `url` as 192k mp3 into DOWNLOADS_DIR.
 
     Raises yt_dlp.utils.DownloadError on bad URLs / network errors /
     unsupported sites. Caller is responsible for user-facing messaging.
     """
-    out_dir = Path(DOWNLOADS_DIR).resolve()
+    out_dir = DOWNLOADS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # First pass: grab the video title (no download, no disk write).

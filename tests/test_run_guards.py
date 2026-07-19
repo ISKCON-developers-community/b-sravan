@@ -1,10 +1,11 @@
 """End-to-end run() tests for the credential guard.
 
 Verifies: -d / --download-only works without Telegram credentials in
-.env, while the upload path still requires them. Each test spawns the
-tool in a subprocess from a temp directory with a sanitized environment
-so config.py truly sees no credentials (rather than relying on
-import-time caching or the project's own .env).
+.env, and the upload path without -d / creds falls back to download-only
+(warns, rc=0). Each test spawns the tool in a subprocess from a temp
+directory with a sanitized environment so config.py truly sees no
+credentials (rather than relying on import-time caching or the
+project's own .env).
 """
 import os
 import subprocess
@@ -39,14 +40,16 @@ def _run_in_clean_env(args) -> subprocess.CompletedProcess:
         if src_mp3.is_file():
             (Path(tmp) / "test.mp3").write_bytes(src_mp3.read_bytes())
         # The tool is just an import of main.run() with sys.argv set.
+        # download + fetch_title are stubbed (both are network calls) so the
+        # test runs offline and deterministically.
         cmd = [PYTHON, "-c",
-               f"import sys; sys.argv = {args!r}; "
-               # Project root on sys.path so 'import main' finds it.
-               f"sys.path.insert(0, '{REPO}'); "
+               "import sys; sys.argv = " + repr(args) + "; "
+               "sys.path.insert(0, '" + str(REPO) + "'); "
                "import main; "
                "from pathlib import Path; "
                "from downloader import Download; "
                "main.download = lambda url: Download(path=Path('test.mp3'), title='T'); "
+               "main.fetch_title = lambda url: 'T'; "
                "sys.exit(main.run())"]
         return subprocess.run(cmd, cwd=tmp, env=clean,
                               capture_output=True, text=True, timeout=15)
@@ -73,10 +76,13 @@ class TestRunGuards:
         r = _run_in_clean_env(
             ["main.py", "-l", "http://x", "--artist", "A", "--title", "T"]
         )
-        assert r.returncode == 2, (
-            f"upload path should fail with rc=2 without creds; "
+        # Without creds and without -d, run() falls back to download-only
+        # (rc=0) and warns, rather than hard-failing with rc=2.
+        assert r.returncode == 0, (
+            f"missing creds should fall back to download-only (rc=0); "
             f"got rc={r.returncode}\nstdout: {r.stdout}\nstderr: {r.stderr}"
         )
-        assert "must be set in .env" in r.stdout + r.stderr, (
-            f"expected the credential-guard message; got: {r.stdout + r.stderr}"
+        assert "falling back to download-only" in r.stdout + r.stderr, (
+            f"expected the fallback warning; got: {r.stdout + r.stderr}"
         )
+        assert "download-only mode" in r.stdout + r.stderr
