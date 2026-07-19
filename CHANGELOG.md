@@ -5,7 +5,7 @@ All notable changes to b-shravan are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - 2026-07-19
+## [0.1.2] - 2026-07-19
 
 ### Added
 - **YouTube live-stream picker** (`yt_picker.py`): when run without `-l`
@@ -21,19 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with code 130 plus a one-line message instead of a raw traceback.
 
 ### Changed
-- **Config layout reorganised**: `config.py` now has two clearly delimited
-  sections — `TUNABLE DEFAULTS` (top, edit freely: `AUDIO_BITRATE`,
-  `ALBUM_NAME`, `GENRE`, `CUSTOM_DESCRIPTION`, `DEFAULT_SPEAKER_NAME`,
-  `DOWNLOADS_DIR`, `ENTITY`, `CHANNEL_ID`, `ADMIN_ID`, `YT_CHANNEL`,
-  `YT_PICKER_LIMIT`) and `IMMUTABLE CREDENTIALS` (bottom, loaded from
-  `.env`: `API_ID`, `API_HASH`, `PHONE`).
-- **`.env` now needs only three secrets** (`API_ID`, `API_HASH`,
-  `PHONE`). The channel id, session name, ID3 tags, download dir, audio
-  bitrate, and YouTube source channel are all configured in `config.py`.
-- **Session filename uses `ENTITY` config** instead of a hardcoded
-  string: `b-shravan-session.session` by default.
-- **Audio bitrate is configurable** via `config.AUDIO_BITRATE`
-  (default 128 kbps, was hardcoded 192).
 - **All paths are now absolute** (anchored to `BASE_DIR = project root`),
   so the tool works correctly when launched from any working directory.
   Previously relative `covers/`, `downloads/`, and the Telethon session
@@ -42,9 +29,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   metadata-only yt-dlp pass to prefill the Artist/Title prompts, so the
   user confirms the title *before* the (often 90-minute) audio download
   starts.
+- README updated with the YouTube picker usage, on both Unix and Windows
+  install paths.
+
+## [0.1.1] - 2026-07-19
+
+### Changed
+- **Config layout reorganised**: `config.py` now has two clearly delimited
+  sections — `TUNABLE DEFAULTS` (top, edit freely: `AUDIO_BITRATE`,
+  `ALBUM_NAME`, `GENRE`, `CUSTOM_DESCRIPTION`, `DEFAULT_SPEAKER_NAME`,
+  `DOWNLOADS_DIR`, `ENTITY`, `CHANNEL_ID`, `ADMIN_ID`) and
+  `IMMUTABLE CREDENTIALS` (bottom, loaded from `.env`:
+  `API_ID`, `API_HASH`, `PHONE`).
+- **`.env` now needs only three secrets** (`API_ID`, `API_HASH`,
+  `PHONE`). The channel id, session name, ID3 tags, download dir, and
+  audio bitrate are all configured in `config.py`.
+- **Session filename uses `ENTITY` config** instead of a hardcoded
+  string: `b-shravan-session.session` by default.
+- **Audio bitrate is configurable** via `config.AUDIO_BITRATE`
+  (default 128 kbps, was hardcoded 192).
 - **All TODO/FIXME comments removed** from project source.
-- README updated to reflect the 3-secret `.env` + tunable `config.py`
-  split and the new YouTube picker, on both Unix and Windows install paths.
 
 ### Notes
 - No breaking changes for existing users. If your `.env` had
