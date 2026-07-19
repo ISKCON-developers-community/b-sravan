@@ -41,6 +41,11 @@ ENTITY = "b-shravan-session"
 # Accepts: @username, -100... canonical id, public id, or invite link
 CHANNEL_ID = "@hkhrtest" #TODO consider move in .env because I have prod and dev environment
 
+# YouTube source channel for the live-stream picker (no API key; yt-dlp).
+# Handle (@foo), id, or URL. Picker lists the 5 newest past live streams.
+YT_CHANNEL = "@SoznanieKrishnyBLR"
+YT_PICKER_LIMIT = 5
+
 # Personal Telegram user id (for future "send copy to me" feature)
 ADMIN_ID = 0
 
