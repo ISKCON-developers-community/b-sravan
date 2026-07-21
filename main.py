@@ -70,10 +70,12 @@ def prompt_url() -> str:
         print("URL cannot be empty.")
 
 
-def prompt_url_with_picker() -> str:
+def prompt_url_with_picker() -> tuple[str, str | None]:
     """Offer the YouTube live-stream picker; fall back to a manual URL.
 
-    Returns a video URL. Skips the picker (straight to manual prompt) if
+    Returns ``(url, title)`` — title is ``None`` when the user pastes a URL
+    manually, or the video title when picked from the list (saves a redundant
+    ``fetch_title`` call). Skips the picker (straight to manual prompt) if
     there are no Telegram creds (download-only / creds-less mode) or if the
     fetch fails for any reason.
     """
@@ -83,18 +85,18 @@ def prompt_url_with_picker() -> str:
     if not API_ID or not API_HASH or not PHONE:
         return prompt_url()
     if not YT_CHANNEL:
-        return prompt_url()
+        return prompt_url(), None
 
     try:
         log.info("fetching recent live streams from %s", YT_CHANNEL)
         streams = fetch_live_streams(YT_CHANNEL, limit=YT_PICKER_LIMIT)
     except Exception as e:
         log.warning("live-stream picker failed (%s); enter URL manually", e)
-        return prompt_url()
+        return prompt_url(), None
 
     if not streams:
         log.warning("no past live streams found; enter URL manually")
-        return prompt_url()
+        return prompt_url(), None
 
     print("\nRecent live streams — pick a number:")
     for i, s in enumerate(streams, 1):
@@ -105,9 +107,10 @@ def prompt_url_with_picker() -> str:
             print("Choose a number or paste a URL.")
             continue
         if raw.startswith("http://") or raw.startswith("https://"):
-            return raw
+            return raw, None
         if raw.isdigit() and 1 <= int(raw) <= len(streams):
-            return streams[int(raw) - 1].url
+            s = streams[int(raw) - 1]
+            return s.url, s.title
         print(f"Enter 1–{len(streams)} or a full URL.")
 
 
@@ -198,15 +201,19 @@ def run() -> int:
         )
         return 2
 
-    url = args.link or prompt_url_with_picker()
+    if args.link:
+        url = args.link
+        yt_title = None
+    else:
+        url, yt_title = prompt_url_with_picker()
 
-    # 1. Fetch the video title — used as the default for the title prompt
-    #    when using -l, or auto-set when using the picker (title already shown).
-    try:
-        yt_title = fetch_title(url)
-    except Exception as e:
-        log.error("could not read video title: %s", e)
-        return 1
+    # 1. Fetch the video title if we don't have it from the picker
+    if yt_title is None:
+        try:
+            yt_title = fetch_title(url)
+        except Exception as e:
+            log.error("could not read video title: %s", e)
+            return 1
     log.info("video title: %r", yt_title)
 
     # 2. Prompt for tags
