@@ -200,8 +200,8 @@ def run() -> int:
 
     url = args.link or prompt_url_with_picker()
 
-    # 1. Prefetch the video title (cheap, no download) so the user can
-    #    confirm / edit it BEFORE the heavier audio download starts.
+    # 1. Fetch the video title — used as the default for the title prompt
+    #    when using -l, or auto-set when using the picker (title already shown).
     try:
         yt_title = fetch_title(url)
     except Exception as e:
@@ -209,17 +209,23 @@ def run() -> int:
         return 1
     log.info("video title: %r", yt_title)
 
-    # 2. Prompt for tags (with sensible defaults for scripting)
+    # 2. Prompt for tags
+    #    - -l path: prompt both (title defaults to the YouTube title)
+    #    - Picker path: prompt artist only (title is already in the menu)
     if args.artist and args.title:
         artist, title = args.artist, args.title
     else:
-        default_artist = args.artist or ""
-        default_title = args.title or yt_title
-        artist = prompt_tag("Artist", default_artist) if not args.artist else args.artist
-        title = prompt_tag("Title",  default_title)  if not args.title  else args.title
+        artist = prompt_tag("Artist", args.artist or "") if not args.artist else args.artist
+        if args.link:
+            # -l: prompt title with the YouTube title as default
+            default_title = args.title or yt_title
+            title = prompt_tag("Title", default_title) if not args.title else args.title
+        else:
+            # Picker: title is auto-set from the video (already shown in menu)
+            title = yt_title
     log.info("tags: artist=%r title=%r", artist, title)
 
-    # 3. Download
+    # 2. Download
     log.info("downloading %s", url)
     try:
         dl = download(url)
@@ -228,11 +234,11 @@ def run() -> int:
         return 1
     log.info("downloaded -> %s (title=%r)", dl.path, dl.title)
 
-    # 4. Tag the mp3
+    # 3. Tag the mp3
     tag_mp3(dl.path, artist, title)
     log.info("id3 tags written")
 
-    # 5. Build caption
+    # 4. Build caption
     caption = build_channel_caption(artist, title, CUSTOM_DESCRIPTION)
     print("----caption----")
     print(caption, end="")
@@ -243,7 +249,7 @@ def run() -> int:
         print(f"File saved at: {dl.path}")
         return 0
 
-    # 6. Upload
+    # 5. Upload
     log.info("posting to %s", channel)
     t0 = time.monotonic()
     try:
