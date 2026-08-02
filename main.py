@@ -14,6 +14,7 @@ import asyncio
 import logging
 import sys
 import time
+import readline
 from pathlib import Path
 
 from audio_uploader import TelegramAudioUploader, AudioUploadError
@@ -238,8 +239,9 @@ def run() -> int:
             default_title = args.title or yt_title
             title = prompt_tag("Title", default_title) if not args.title else args.title
         else:
-            # Picker: title is auto-set from the video (already shown in menu)
-            title = yt_title
+            # Picker: also prompt for title (YouTube title as default)
+            default_title = args.title or yt_title
+            title = prompt_tag("Title", default_title) if not args.title else args.title
     log.info("tags: artist=%r title=%r", artist, title)
 
     # 2. Download
