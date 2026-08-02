@@ -5,6 +5,15 @@ All notable changes to b-shravan are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-08-02
+
+### Added
+- **ASCII banner** (`banner.py`): pagga dot-matrix font banner with project name "Bhagavat sravan", author, and GitHub link. Prints on startup.
+
+### Changed
+- **Cover image validation**: Before upload, checks if a cover image exists for the speaker (`covers/{artist}.jpg`). If missing, prompts user to correct the name or continue anyway.
+- **Picker title optimization**: When selecting from the YouTube live-stream picker, the video title is auto-set from the menu selection (no redundant `fetch_title` call). The `-l` path still prompts for title with YouTube title as default.
+
 ## [0.1.2] - 2026-07-19
 
 ### Added
