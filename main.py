@@ -22,7 +22,7 @@ from config import (
     API_HASH, API_ID, BASE_DIR, CHANNEL_ID, COVERS_DIR, CUSTOM_DESCRIPTION, ENTITY, PHONE,
 )
 from downloader import download, fetch_title
-from tagger import tag_mp3
+from tagger import tag_mp3, is_cover_exists
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
@@ -216,6 +216,14 @@ def run() -> int:
         default_artist = args.artist or ""
         default_title = args.title or yt_title
         artist = prompt_tag("Artist", default_artist) if not args.artist else args.artist
+        while True:
+            if not is_cover_exists(artist):
+                print(f"Check th name of speaker **{artist}**. \nThere is no photo for this speaker. Add file in the cover folder as {artist}.jpg and continue")
+                choice = input("Type correct speaker's name or just hit ENTER to continue: ")
+                if choice.strip():
+                    artist = choice.strip()
+                else:
+                    break
         title = prompt_tag("Title",  default_title)  if not args.title  else args.title
     log.info("tags: artist=%r title=%r", artist, title)
 
