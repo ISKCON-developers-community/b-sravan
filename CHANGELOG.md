@@ -5,6 +5,14 @@ All notable changes to b-shravan are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-08-02
+
+### Fixed
+- **Title prompt in picker path**: When selecting from the YouTube live-stream picker, the title is now prompted (with YouTube title as default) instead of being silently auto-set. Same behavior as the `-l` path.
+
+### Changed
+- Added `import readline` for better input line editing support.
+
 ## [0.1.3] - 2026-08-02
 
 ### Added
