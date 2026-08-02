@@ -23,6 +23,7 @@ from config import (
 )
 from downloader import download, fetch_title
 from tagger import tag_mp3, is_cover_exists
+import banner
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
@@ -180,7 +181,6 @@ async def _post_to_channel(
 # ---------- Main flow -------------------------------------------------------
 
 def run() -> int:
-    #TODO create ASCII art banner
     args = parse_args()
 
     if not API_ID or not API_HASH or not PHONE:
