@@ -20,6 +20,9 @@ def _cover_path(artist: str) -> Path | None:
         return default
     return None
 
+def is_cover_exists(artist: str) -> bool:
+    cover = COVERS_DIR / f"{artist}.jpg"
+    return True if cover.is_file() else False
 
 def tag_mp3(file_path: Union[str, Path], artist: str, title: str) -> None:
     """Write ID3v2 tags onto an mp3 in place.

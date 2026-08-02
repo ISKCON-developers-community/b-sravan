@@ -70,9 +70,10 @@ check(
     "-d" in r.stdout and "--download-only" in r.stdout,
 )
 
-# 4. End-to-end: download-only path with a stubbed downloader AND a stubbed
-#    title fetch (both are network calls; no YouTube, no Telegram). Confirms
-#    the early-exit branch returns 0 and never touches the upload code.
+# 4. End-to-end: download-only path with a stubbed downloader and
+#    title fetch (both are network calls; no YouTube, no Telegram).
+#    Confirms the early-exit branch returns 0 and never touches the
+#    upload code.
 import main
 def fake_download(url):
     from downloader import Download

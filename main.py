@@ -22,7 +22,8 @@ from config import (
     API_HASH, API_ID, BASE_DIR, CHANNEL_ID, COVERS_DIR, CUSTOM_DESCRIPTION, ENTITY, PHONE,
 )
 from downloader import download, fetch_title
-from tagger import tag_mp3
+from tagger import tag_mp3, is_cover_exists
+import banner
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
@@ -70,10 +71,12 @@ def prompt_url() -> str:
         print("URL cannot be empty.")
 
 
-def prompt_url_with_picker() -> str:
+def prompt_url_with_picker() -> tuple[str, str | None]:
     """Offer the YouTube live-stream picker; fall back to a manual URL.
 
-    Returns a video URL. Skips the picker (straight to manual prompt) if
+    Returns ``(url, title)`` — title is ``None`` when the user pastes a URL
+    manually, or the video title when picked from the list (saves a redundant
+    ``fetch_title`` call). Skips the picker (straight to manual prompt) if
     there are no Telegram creds (download-only / creds-less mode) or if the
     fetch fails for any reason.
     """
@@ -83,18 +86,18 @@ def prompt_url_with_picker() -> str:
     if not API_ID or not API_HASH or not PHONE:
         return prompt_url()
     if not YT_CHANNEL:
-        return prompt_url()
+        return prompt_url(), None
 
     try:
         log.info("fetching recent live streams from %s", YT_CHANNEL)
         streams = fetch_live_streams(YT_CHANNEL, limit=YT_PICKER_LIMIT)
     except Exception as e:
         log.warning("live-stream picker failed (%s); enter URL manually", e)
-        return prompt_url()
+        return prompt_url(), None
 
     if not streams:
         log.warning("no past live streams found; enter URL manually")
-        return prompt_url()
+        return prompt_url(), None
 
     print("\nRecent live streams — pick a number:")
     for i, s in enumerate(streams, 1):
@@ -105,9 +108,10 @@ def prompt_url_with_picker() -> str:
             print("Choose a number or paste a URL.")
             continue
         if raw.startswith("http://") or raw.startswith("https://"):
-            return raw
+            return raw, None
         if raw.isdigit() and 1 <= int(raw) <= len(streams):
-            return streams[int(raw) - 1].url
+            s = streams[int(raw) - 1]
+            return s.url, s.title
         print(f"Enter 1–{len(streams)} or a full URL.")
 
 
@@ -177,7 +181,6 @@ async def _post_to_channel(
 # ---------- Main flow -------------------------------------------------------
 
 def run() -> int:
-    #TODO create ASCII art banner
     args = parse_args()
 
     if not API_ID or not API_HASH or not PHONE:
@@ -198,28 +201,48 @@ def run() -> int:
         )
         return 2
 
-    url = args.link or prompt_url_with_picker()
+    if args.link:
+        url = args.link
+        yt_title = None
+    else:
+        url, yt_title = prompt_url_with_picker()
 
-    # 1. Prefetch the video title (cheap, no download) so the user can
-    #    confirm / edit it BEFORE the heavier audio download starts.
-    try:
-        yt_title = fetch_title(url)
-    except Exception as e:
-        log.error("could not read video title: %s", e)
-        return 1
+    # 1. Fetch the video title if we don't have it from the picker
+    if yt_title is None:
+        try:
+            yt_title = fetch_title(url)
+        except Exception as e:
+            log.error("could not read video title: %s", e)
+            return 1
     log.info("video title: %r", yt_title)
 
-    # 2. Prompt for tags (with sensible defaults for scripting)
+    # 2. Prompt for tags
+    #    - -l path: prompt both (title defaults to the YouTube title)
+    #    - Picker path: prompt artist only (title is already in the menu)
     if args.artist and args.title:
         artist, title = args.artist, args.title
     else:
         default_artist = args.artist or ""
-        default_title = args.title or yt_title
         artist = prompt_tag("Artist", default_artist) if not args.artist else args.artist
-        title = prompt_tag("Title",  default_title)  if not args.title  else args.title
+
+        while not is_cover_exists(artist):
+            print(f"Check the name of speaker **{artist}**. \nThere is no photo for this speaker. Add file in the cover folder as {artist}.jpg and continue")
+            choice = input("Type correct speaker's name or just hit ENTER to continue: ")
+            if choice.strip():
+                artist = choice.strip()
+            else:
+                break
+
+        if args.link:
+            # -l: prompt title with the YouTube title as default
+            default_title = args.title or yt_title
+            title = prompt_tag("Title", default_title) if not args.title else args.title
+        else:
+            # Picker: title is auto-set from the video (already shown in menu)
+            title = yt_title
     log.info("tags: artist=%r title=%r", artist, title)
 
-    # 3. Download
+    # 2. Download
     log.info("downloading %s", url)
     try:
         dl = download(url)
@@ -228,11 +251,11 @@ def run() -> int:
         return 1
     log.info("downloaded -> %s (title=%r)", dl.path, dl.title)
 
-    # 4. Tag the mp3
+    # 3. Tag the mp3
     tag_mp3(dl.path, artist, title)
     log.info("id3 tags written")
 
-    # 5. Build caption
+    # 4. Build caption
     caption = build_channel_caption(artist, title, CUSTOM_DESCRIPTION)
     print("----caption----")
     print(caption, end="")
@@ -243,7 +266,7 @@ def run() -> int:
         print(f"File saved at: {dl.path}")
         return 0
 
-    # 6. Upload
+    # 5. Upload
     log.info("posting to %s", channel)
     t0 = time.monotonic()
     try:

@@ -28,11 +28,7 @@ def _safe_filename(title: str) -> str:
 
 
 def fetch_title(url: str) -> str:
-    """Cheaply fetch the video title (no download, no disk write).
-
-    Used to prefill the title prompt before the heavier download begins.
-    Raises yt_dlp.utils.DownloadError on bad URLs / network errors.
-    """
+    """Cheaply fetch the video title (no download, no disk write)."""
     with yt_dlp.YoutubeDL({"quiet": True, "skip_download": True}) as ydl:  # type: ignore[arg-type]
         info = ydl.extract_info(url, download=False)
     return info.get("title") or "audio"
