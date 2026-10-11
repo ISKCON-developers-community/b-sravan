@@ -5,6 +5,16 @@ All notable changes to b-shravan are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-10-11
+
+### Changed
+- **Three-tier config priority** (`config.py`): CLI flags → `.env` → `config.py` defaults. New `_env_str()` and `_env_int()` helpers let every tunable be overridden locally without editing `config.py`. Empty strings in `.env` are treated as "not set", so users can comment/uncomment lines freely.
+- **`.env.example` documented**: every tunable that can be overridden is listed with a commented example — including `CHANNEL_ID` for prod/dev switching, `AUDIO_BITRATE`, `ALBUM_NAME`, `GENRE`, `YT_CHANNEL`, etc.
+- **`yt-dlp` bumped** to `>=2026.08.19` (from `>=2025.10.22`) for the latest YouTube extractor fixes and format support. `uv.lock` regenerated.
+
+### Resolved
+- The long-standing TODO in `config.py` about moving `CHANNEL_ID` to `.env` for prod vs dev environments — now any tunable can be overridden via `.env` with zero code changes.
+
 ## [0.1.4] - 2026-08-02
 
 ### Fixed
