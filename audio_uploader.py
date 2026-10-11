@@ -82,7 +82,7 @@ class CoverArt:
         if not artist:
             artist = "unknown"
         
-        safe_artist = "".join(c for c in artist if c.isalnum() or c in " _-")
+        safe_artist = artist
         custom_cover = self.covers_dir / f"{safe_artist}.jpg"
         
         if custom_cover.is_file():
